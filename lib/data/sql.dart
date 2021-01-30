@@ -5,6 +5,7 @@ import 'package:expense_tracker/models/Expense.dart';
 
 import 'package:path/path.dart';
 
+/// SQL wrapper to interface internal expense database
 class SQLFactory {
   SQLFactory._();
   static final SQLFactory db = SQLFactory._();
@@ -17,6 +18,7 @@ class SQLFactory {
     return _database;
   }
 
+  /// Initializes database file and creates relevant tables
   initDatabase() async {
     return await openDatabase(
       join(await getDatabasesPath(), 'ExpenseTracker33'),
@@ -40,7 +42,20 @@ class SQLFactory {
     );
   }
 
-  addCategory(String name) async {
+  /// ### Parameters
+  /// * [name] category name
+  ///
+  /// ### Output
+  /// Returns ID of inserted category row.
+  ///
+  /// ### Description
+  /// Inserts category row into database with name column value as [name].
+  ///
+  /// ### Usage Example
+  /// ```dart
+  /// int id = await SQLFactory.db.addCategory('Gas');
+  /// ```
+  Future<int> addCategory(String name) async {
     final db = await database;
 
     int response = await db.rawInsert(
@@ -51,7 +66,21 @@ class SQLFactory {
     return response;
   }
 
-  addExpense(Expense expense) async {
+  /// ### Parameters
+  /// * [expense] expense to be inserted into database
+  ///
+  /// ### Output
+  /// Returns ID of inserted Expense row.
+  ///
+  /// ### Description
+  /// Inserts expense row into database with name column
+  /// values as member variables of [expense].
+  ///
+  /// ### Usage Example
+  /// ```dart
+  /// int id = await SQLFactory.db.addExpense(_expense);
+  /// ```
+  Future<int> addExpense(Expense expense) async {
     final db = await database;
 
     int response = await db.rawInsert(
@@ -67,6 +96,16 @@ class SQLFactory {
     return response;
   }
 
+  /// ### Parameters
+  /// * [id] ID of category to delete from database
+  ///
+  /// ### Description
+  /// deletes category row from database where ID column value = [id].
+  ///
+  /// ### Usage Example
+  /// ```dart
+  /// SQLFactory.db.deleteCategory(id);
+  /// ```
   Future<void> deleteCategory(int id) async {
     final db = await database;
     await db.rawQuery(
@@ -75,6 +114,16 @@ class SQLFactory {
     );
   }
 
+  /// ### Parameters
+  /// * [id] ID of expense to delete from database
+  ///
+  /// ### Description
+  /// deletes expense row from database where ID column value = [id].
+  ///
+  /// ### Usage Example
+  /// ```dart
+  /// SQLFactory.db.deleteExpense(id);
+  /// ```
   Future<void> deleteExpense(int id) async {
     final db = await database;
     await db.rawQuery(
@@ -83,23 +132,42 @@ class SQLFactory {
     );
   }
 
+  /// ### Description
+  /// Deletes all expenses and categories from database.
+  ///
+  /// ### Usage Example
+  /// ```dart
+  /// await SQLFactory.db.deleteAllCategories();
+  /// ```
   Future<void> deleteAllCategories() async {
     final db = await database;
     await db.rawQuery('DELETE FROM expenses');
     await db.rawQuery('DELETE FROM categories');
   }
 
+  /// ### Description
+  /// Deletes all expenses from database.
+  ///
+  /// ### Usage Example
+  /// ```dart
+  /// await SQLFactory.db.deleteAllCategories();
+  /// ```
   Future<void> deleteAllExpenses() async {
     final db = await database;
     await db.rawQuery('DELETE FROM expenses');
   }
 
-  Future<void> dropTables() async {
-    final db = await database;
-    await db.execute('DROP TABLE expenses');
-    await db.execute('DROP TABLE categories');
-  }
-
+  /// ### Output
+  /// Returns list of categories
+  ///
+  /// ### Description
+  /// Retrieves all rows from categories table
+  /// and converts to list of categories.
+  ///
+  /// ### Usage Example
+  /// ```dart
+  /// List<Category> categories = await SQLFactory.db.getCategories();
+  /// ```
   Future<List<Category>> getCategories() async {
     final db = await database;
     final response = await db.query('categories');
@@ -112,6 +180,16 @@ class SQLFactory {
     return categories;
   }
 
+  /// ### Output
+  /// Returns total number of expenese in database
+  ///
+  /// ### Description
+  /// Retrieves total row count of expenses table.
+  ///
+  /// ### Usage Example
+  /// ```dart
+  /// int count = await getExpenseCount();
+  /// ```
   Future<int> getExpenseCount() async {
     final db = await database;
     final response =
@@ -119,6 +197,13 @@ class SQLFactory {
     return response[0]['count'];
   }
 
+  /// ### Description
+  /// Retrieves all rows from expenses table.
+  ///
+  /// ### Usage Example
+  /// ```dart
+  /// int count = await getExpenseCount();
+  /// ```
   Future<List<Expense>> getExpenses() async {
     final db = await database;
     final response = await db.rawQuery(
@@ -132,6 +217,17 @@ class SQLFactory {
     return expenses;
   }
 
+  /// ### Output
+  /// Returns a list of Map<int, num> that match years with respective total
+  ///
+  /// ### Description
+  /// Retrieves list of year-total key value pair
+  /// for every year that had an expense.
+  ///
+  /// ### Usage Example
+  /// ```dart
+  /// List<MapEntry<int, num>> years = await SQLFactory.db.getYearlyTotals();
+  /// ```
   Future<List<MapEntry<int, num>>> getYearlyTotals() async {
     final db = await database;
     final response = await db.rawQuery('SELECT * FROM expenses');
@@ -146,6 +242,16 @@ class SQLFactory {
     return years.entries.toList();
   }
 
+  /// ### Parameters
+  /// * [expense] New expense to be updated in database
+  ///
+  /// ### Description
+  /// Updates row in expenses where ID column value = [expense.id].
+  ///
+  /// ### Usage Example
+  /// ```dart
+  /// await updateExpense(expense);
+  /// ```
   Future<void> updateExpense(Expense expense) async {
     final db = await database;
     await db.rawUpdate(
@@ -166,6 +272,19 @@ class SQLFactory {
     );
   }
 
+  /// ### Parameters
+  /// * [id] Category ID to match expenses.category column value against
+  ///
+  /// ### Output
+  /// Returns list of expenses that match category of [id]
+  ///
+  /// ### Description
+  /// Retrieves list of expenses from expenses table that have a category ID of [id].
+  ///
+  /// ### Usage Example
+  /// ```dart
+  /// List<Expense> expenses = await SQLFactory.db.getExpensesByCategory(id);
+  /// ```
   Future<List<Expense>> getExpensesByCategory(int id) async {
     final List<Expense> expenses = <Expense>[];
     final db = await database;

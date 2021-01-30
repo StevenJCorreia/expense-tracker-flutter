@@ -1,5 +1,6 @@
 import 'package:expense_tracker/models/Category.dart';
 
+/// Expense data model
 class Expense {
   int id;
   Category category;

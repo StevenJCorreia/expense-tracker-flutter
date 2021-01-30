@@ -1,3 +1,4 @@
+/// Category data model
 class Category {
   int id;
   String name;
@@ -12,9 +13,9 @@ class Category {
   }
 
   factory Category.fromJSON(Map<String, dynamic> json) => Category.builder(
-    id: json['id'],
-    name: json['name'],
-  );
+        id: json['id'],
+        name: json['name'],
+      );
 
   Category.builder({this.id, this.name});
 }

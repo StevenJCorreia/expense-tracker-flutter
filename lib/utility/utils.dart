@@ -1,7 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+/// Utility class that contains static misc. helper methods
 class Utils {
+  /// ### Parameters
+  /// * [context] showDialog context
+  /// * [title] Dialog title
+  /// * [content] Dialog content
+  /// * [buttons] Dialog action buttons (defaults to "Okay" dismissal button)
+  ///
+  /// ### Description
+  /// Wrapper for current implementation of
+  /// ```dart
+  /// showDialog();
+  /// ```
+  ///
+  /// ### Usage Example
+  /// ```dart
+  /// Utils.alertError(context, 'Error', 'Some information.');
+  /// ```
   static void alertError(BuildContext context, String title, String content,
       [List<Widget> buttons]) {
     if (buttons == null) {
@@ -26,7 +43,10 @@ class Utils {
 
   /// ### Parameters
   /// * [pattern] Format pattern
-  /// * [date] Date to be formatted.
+  /// * [date] Date to be formatted
+  ///
+  /// ### Output
+  /// Returns given [date] formatted with [pattern].
   ///
   /// ### Description
   /// Wrapper for current implementation of
@@ -41,7 +61,7 @@ class Utils {
   ///
   /// ### Usage Example
   /// ```dart
-  /// Utils.formatDate('MMM ddo yyyy', new DateTime(2021, 1, 22)) // 'Jan 22th 2021'
+  /// Utils.formatDate('MMM ddo yyyy', new DateTime(2021, 1, 22)); // 'Jan 22th 2021'
   /// ```
   static String formatDate(String pattern, DateTime date) {
     String ordinal;

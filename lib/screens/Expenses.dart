@@ -336,7 +336,37 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
   void _menuItemSelected(String item) async {
     switch (item) {
       case 'Categories':
-        Navigator.pushNamed(context, 'Categories');
+        Navigator.pushNamed(context, 'Categories').then((value) {
+          SQLFactory.db.getExpenses().then((List<Expense> expenseList) {
+            // Sort according to saved sort preference
+            switch (_sortBy) {
+              case 1:
+                expenseList
+                    .sort((a, b) => a.category.name.compareTo(b.category.name));
+                break;
+              case 2:
+                expenseList
+                    .sort((a, b) => b.category.name.compareTo(a.category.name));
+                break;
+              case 3:
+                expenseList.sort((a, b) => a.date.compareTo(b.date));
+                break;
+              case 4:
+                expenseList.sort((a, b) => b.date.compareTo(a.date));
+                break;
+              case 5:
+                expenseList.sort((a, b) => a.price.compareTo(b.price));
+                break;
+              case 6:
+                expenseList.sort((a, b) => b.price.compareTo(a.price));
+                break;
+            }
+
+            setState(() {
+              _expenses = expenseList;
+            });
+          });
+        });
         break;
       case 'Sort':
         if (_filteredexpenses.length == 0) {

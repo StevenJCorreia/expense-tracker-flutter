@@ -84,6 +84,9 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text('Add Category'),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(20)),
+        ),
         content: SingleChildScrollView(
           child: Container(
             width: MediaQuery.of(context).size.width,
@@ -117,6 +120,9 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
   //     // TODO - Figure out how to widen the checkbox text...
   //     builder: (ctx) => AlertDialog(
   //       title: Text('Image'),
+  //       shape: RoundedRectangleBorder(
+  //         borderRadius: BorderRadius.all(Radius.circular(20)),
+  //       ),
   //       content: SingleChildScrollView(
   //       child: Container(
   //           width: double.infinity,

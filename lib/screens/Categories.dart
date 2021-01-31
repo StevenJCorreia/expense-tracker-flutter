@@ -136,6 +136,9 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
         context: context,
         builder: (ctx) => AlertDialog(
           title: Text('Add Category'),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(20)),
+          ),
           content: SingleChildScrollView(
             child: Container(
               width: MediaQuery.of(context).size.width,
@@ -211,6 +214,9 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text('Sort'),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(20)),
+        ),
         content: SingleChildScrollView(
           child: Container(
             width: MediaQuery.of(context).size.width,

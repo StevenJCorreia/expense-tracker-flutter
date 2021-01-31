@@ -207,7 +207,7 @@ class SQLFactory {
   Future<List<Expense>> getExpenses() async {
     final db = await database;
     final response = await db.rawQuery(
-        'SELECT expenses.id, category AS category_id, name, date, description, price from categories, expenses group by category_id');
+        'SELECT expenses.id, category AS category_id, name, date, price, description from categories, expenses group by expenses.id');
 
     final List<Expense> expenses = <Expense>[];
     for (var row in response) {

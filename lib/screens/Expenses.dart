@@ -1,3 +1,4 @@
+import 'package:expense_tracker/models/Category.dart';
 import 'package:flutter/material.dart';
 
 import 'package:expense_tracker/models/Expense.dart';
@@ -6,6 +7,7 @@ import 'package:expense_tracker/data/sql.dart';
 import 'package:expense_tracker/utility/utils.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:file_picker/file_picker.dart';
 
 // TODO - Swap Dismissible for the longPress implementation
 // TODO - Fix Navigator stack issues
@@ -51,7 +53,287 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
     );
   }
 
-  void _menuItemSelected(String item) {
+  Future<void> _export() async {
+    // Get user-desired directory
+    final String directory = await FilePicker.platform.getDirectoryPath();
+    if (directory == null) {
+      return;
+    }
+
+    // Export file to directory if valid
+    final bool result = Expense.exportExpenses(directory, _expenses);
+
+    if (!result) {
+      Utils.alertError(
+        context,
+        'File Error',
+        'File could not be written to at chosen directory.',
+      );
+    } else {
+      ScaffoldMessenger.of(this.context).showSnackBar(SnackBar(
+        content: Text('Exported ${_expenses.length} expense(s).'),
+      ));
+    }
+  }
+
+  Future<void> _import() async {
+    // Get file location
+    final FilePickerResult result = await FilePicker.platform
+        .pickFiles(type: FileType.custom, allowedExtensions: ['csv']);
+    if (result == null) {
+      return;
+    }
+
+    List<Expense> importedExpenses = [];
+    try {
+      importedExpenses = Expense.importExpenses(result.files[0].path);
+    } catch (e) {
+      Utils.alertError(context, 'File Error',
+          'Could not retrieve expenses from selected file.');
+      return;
+    }
+
+    if (importedExpenses.length == 0) {
+      Utils.alertError(context, 'No Expenses',
+          'No Expenses were retrieved from selected file.');
+    } else {
+      // Display list of imported expenses
+      showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (ctx) {
+          List<Expense> _importedExpenses = importedExpenses;
+          print('${_expenses.length}, ${_filteredexpenses.length}');
+
+          return StatefulBuilder(
+            builder: (context, setState) => AlertDialog(
+              title: Text('Imported Expeneses'),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(20)),
+              ),
+              actions: <Widget>[
+                FlatButton(
+                  child: const Text('Cancel'),
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+                FlatButton(
+                  child: const Text('Import'),
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  textColor: _importedExpenses.length > 0
+                      ? Theme.of(context).accentColor
+                      : Colors.grey,
+                  onPressed: _importedExpenses.length > 0
+                      ? () async {
+                          // Check for any new categories
+                          List<Category> categories =
+                              await SQLFactory.db.getCategories();
+                          for (Expense expense in _importedExpenses) {
+                            final int index = categories.indexWhere(
+                                (Category category) =>
+                                    expense.category.name == category.name);
+                            if (index == -1) {
+                              final int newIndex = await SQLFactory.db
+                                  .addCategory(expense.category.name);
+                              categories.add(
+                                Category.builder(
+                                  id: newIndex,
+                                  name: expense.category.name,
+                                ),
+                              );
+                            }
+                          }
+
+                          // Add all accepted expenses to database
+                          await Future.wait(_importedExpenses.map(
+                              (Expense expense) =>
+                                  SQLFactory.db.addExpense(expense)));
+
+                          // Grab new expenses from DB
+                          List<Expense> expenseList =
+                              await SQLFactory.db.getExpenses();
+                          // Sort according to saved sort preference
+                          switch (_sortBy) {
+                            case 1:
+                              expenseList.sort((a, b) =>
+                                  a.category.name.compareTo(b.category.name));
+                              break;
+                            case 2:
+                              expenseList.sort((a, b) =>
+                                  b.category.name.compareTo(a.category.name));
+                              break;
+                            case 3:
+                              expenseList
+                                  .sort((a, b) => a.date.compareTo(b.date));
+                              break;
+                            case 4:
+                              expenseList
+                                  .sort((a, b) => b.date.compareTo(a.date));
+                              break;
+                            case 5:
+                              expenseList
+                                  .sort((a, b) => a.price.compareTo(b.price));
+                              break;
+                            case 6:
+                              expenseList
+                                  .sort((a, b) => b.price.compareTo(a.price));
+                              break;
+                          }
+
+                          this.setState(() {
+                            _expenses = expenseList;
+                          });
+                          Navigator.of(context).pop();
+                        }
+                      : null,
+                ),
+              ],
+              content: Container(
+                width: double.infinity,
+                child: SingleChildScrollView(
+                  child: Container(
+                    width: double.maxFinite,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Divider(),
+                        _importedExpenses.length > 0
+                            ? ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  maxHeight:
+                                      MediaQuery.of(context).size.height * 0.4,
+                                ),
+                                child: ListView.builder(
+                                    shrinkWrap: true,
+                                    itemCount: _importedExpenses.length,
+                                    itemBuilder:
+                                        (BuildContext context, int index) {
+                                      return Dismissible(
+                                        key: Key(_importedExpenses[index]
+                                            .id
+                                            .toString()),
+                                        background: Container(
+                                          alignment:
+                                              AlignmentDirectional.centerStart,
+                                          child: Icon(
+                                            Icons.delete,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                        secondaryBackground: Container(
+                                          alignment:
+                                              AlignmentDirectional.centerEnd,
+                                          child: Icon(
+                                            Icons.delete,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                        child: GestureDetector(
+                                          child: Card(
+                                            elevation: 10,
+                                            shadowColor: Colors.grey,
+                                            child: Padding(
+                                              padding: const EdgeInsets.all(10),
+                                              child: Column(
+                                                children: <Widget>[
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                            bottom: 4.0),
+                                                    child: Row(
+                                                      children: <Widget>[
+                                                        Text(
+                                                          Utils.formatDate(
+                                                              'MMM ddo yyyy',
+                                                              _importedExpenses[
+                                                                      index]
+                                                                  .date),
+                                                          style: new TextStyle(
+                                                              fontSize: 25.0),
+                                                        ),
+                                                        Spacer(),
+                                                        Text(
+                                                          '\$${_importedExpenses[index].price.toStringAsFixed(2)}',
+                                                          style: new TextStyle(
+                                                              fontSize: 25.0),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                            bottom: 1),
+                                                    child: Row(
+                                                      children: <Widget>[
+                                                        Text(_importedExpenses[
+                                                                index]
+                                                            .category
+                                                            .name),
+                                                        Spacer(),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                            top: 1),
+                                                    child: SizedBox(
+                                                      width: double.infinity,
+                                                      child: Container(
+                                                        child: Text(
+                                                          _importedExpenses[
+                                                                  index]
+                                                              .description,
+                                                          maxLines: 2,
+                                                          textAlign:
+                                                              TextAlign.left,
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        onDismissed: (direction) {
+                                          setState(() {
+                                            _importedExpenses.removeAt(index);
+                                          });
+                                        },
+                                      );
+                                    }),
+                              )
+                            : FlatButton(
+                                onPressed: () {
+                                  setState(() {
+                                    _importedExpenses = Expense.importExpenses(
+                                        result.files[0].path);
+                                  });
+                                },
+                                child: Text(
+                                  'No more expenses! Reset?',
+                                  style: TextStyle(
+                                    color: Theme.of(context).accentColor,
+                                  ),
+                                ),
+                              ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    }
+  }
+
+  void _menuItemSelected(String item) async {
     switch (item) {
       case 'Categories':
         Navigator.pushNamed(context, 'Categories');
@@ -76,9 +358,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
             context, 'Feature WIP', 'Feature is currently a work-in-progress.');
         break;
       case 'Import':
-        // TODO - Implement
-        Utils.alertError(
-            context, 'Feature WIP', 'Feature is currently a work-in-progress.');
+        _import();
         break;
       case 'Export':
         if (_filteredexpenses.length == 0) {
@@ -87,9 +367,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
           return;
         }
 
-        // TODO - Implement
-        Utils.alertError(
-            context, 'Feature WIP', 'Feature is currently a work-in-progress.');
+        _export();
         break;
       case 'Delete All':
         if (_filteredexpenses.length == 0) {

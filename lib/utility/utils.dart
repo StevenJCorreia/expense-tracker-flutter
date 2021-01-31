@@ -35,6 +35,9 @@ class Utils {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(title),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(20)),
+        ),
         content: Text(content),
         actions: buttons,
       ),

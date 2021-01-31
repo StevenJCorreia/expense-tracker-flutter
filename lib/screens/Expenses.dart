@@ -448,6 +448,9 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text('Sort'),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(20)),
+        ),
         content: SingleChildScrollView(
           child: Container(
             width: double.infinity,
@@ -577,6 +580,9 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
         return StatefulBuilder(
           builder: (context, setState) => AlertDialog(
             title: Text('Expense Totals'),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(20)),
+            ),
             content: SingleChildScrollView(
               child: Container(
                 width: double.infinity,

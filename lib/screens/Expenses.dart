@@ -135,12 +135,15 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                             if (index == -1) {
                               final int newIndex = await SQLFactory.db
                                   .addCategory(expense.category.name);
-                              categories.add(
-                                Category.builder(
-                                  id: newIndex,
-                                  name: expense.category.name,
-                                ),
+                              Category newCategory = Category.builder(
+                                id: newIndex,
+                                name: expense.category.name,
                               );
+                              expense.category = newCategory;
+                              categories.add(newCategory);
+                            } else {
+                              // Update imported expense's category with matching one from database
+                              expense.category = categories[index];
                             }
                           }
 

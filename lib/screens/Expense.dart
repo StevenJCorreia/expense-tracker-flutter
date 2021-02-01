@@ -117,7 +117,6 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
   //   showDialog(
   //     barrierDismissible: true,
   //     context: context,
-  //     // TODO - Figure out how to widen the checkbox text...
   //     builder: (ctx) => AlertDialog(
   //       title: Text('Image'),
   //       shape: RoundedRectangleBorder(
@@ -265,15 +264,14 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
                   child: Row(
                     children: [
                       DropdownButton<int>(
-                        value: _expense
-                            .category.id, // TODO - Pre-select first category
+                        value: _expense.category.id,
                         hint: Text(
                           '${_categories.length == 0 ? 'Add' : 'Select'} a Category',
                         ),
                         icon: Icon(Icons.arrow_downward),
                         iconSize: 24,
                         elevation: 16,
-                        isExpanded: false, // TODO - Needs to be true
+                        isExpanded: false,
                         style: TextStyle(color: Colors.black),
                         underline: Container(
                           height: 2,
@@ -370,7 +368,6 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
                     ),
                   ),
                 ),
-                // TODO - Implement this better
                 IconButton(
                   icon: Icon(Icons.camera_alt_rounded),
                   tooltip: 'Attach Image',

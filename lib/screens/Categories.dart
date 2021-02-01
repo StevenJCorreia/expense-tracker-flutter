@@ -370,6 +370,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
         child: ListView.builder(
           itemBuilder: (context, index) {
             return Card(
+              elevation: 5,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),

@@ -56,7 +56,6 @@ class _CategoryScreenState extends State<CategoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO - Style screen better
     return Scaffold(
       appBar: AppBar(
         title: Text(_category.name),

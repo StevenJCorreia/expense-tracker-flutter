@@ -9,7 +9,7 @@ import 'package:expense_tracker/utility/utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:file_picker/file_picker.dart';
 
-// TODO - Swap Dismissible for the longPress implementation
+// TODO - Investigate current search implementation for possible faults
 class ExpensesScreen extends StatefulWidget {
   ExpensesScreen({Key key}) : super(key: key);
 
@@ -132,7 +132,6 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
         context: context,
         builder: (ctx) {
           List<Expense> _importedExpenses = importedExpenses;
-          print('${_expenses.length}, ${_filteredexpenses.length}');
 
           return StatefulBuilder(
             builder: (context, setState) => AlertDialog(
@@ -415,7 +414,6 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
           return;
         }
 
-        // TODO - Implement
         Utils.alertError(
             context, 'Feature WIP', 'Feature is currently a work-in-progress.');
         break;
@@ -828,8 +826,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
               child: GestureDetector(
                 onTap: () => _goToExpense(id: index),
                 child: Card(
-                  color: Colors
-                      .grey, // TODO - Should we even do anything about Card background color?
+                  elevation: 5,
                   child: Padding(
                     padding: const EdgeInsets.all(10),
                     child: Column(

@@ -10,7 +10,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:file_picker/file_picker.dart';
 
 // TODO - Swap Dismissible for the longPress implementation
-// TODO - Fix Navigator stack issues
 class ExpensesScreen extends StatefulWidget {
   ExpensesScreen({Key key}) : super(key: key);
 
@@ -50,7 +49,37 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
           expense: id == null ? Expense() : _filteredexpenses[id],
         ),
       ),
-    );
+    ).then((value) {
+      SQLFactory.db.getExpenses().then((expenseList) async {
+        // Sort according to saved sort preference
+        switch (_sortBy) {
+          case 1:
+            expenseList
+                .sort((a, b) => a.category.name.compareTo(b.category.name));
+            break;
+          case 2:
+            expenseList
+                .sort((a, b) => b.category.name.compareTo(a.category.name));
+            break;
+          case 3:
+            expenseList.sort((a, b) => a.date.compareTo(b.date));
+            break;
+          case 4:
+            expenseList.sort((a, b) => b.date.compareTo(a.date));
+            break;
+          case 5:
+            expenseList.sort((a, b) => a.price.compareTo(b.price));
+            break;
+          case 6:
+            expenseList.sort((a, b) => b.price.compareTo(a.price));
+            break;
+        }
+
+        setState(() {
+          _expenses = expenseList;
+        });
+      });
+    });
   }
 
   Future<void> _export() async {

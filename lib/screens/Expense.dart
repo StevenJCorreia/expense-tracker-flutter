@@ -211,7 +211,7 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
               _expense.id == 0
                   ? await SQLFactory.db.addExpense(_expense)
                   : await SQLFactory.db.updateExpense(_expense);
-              Navigator.popAndPushNamed(context, 'Expenses');
+              Navigator.of(context).pop();
             },
             child: Text('Yes'),
           ),
@@ -221,7 +221,7 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
       _expense.id == 0
           ? await SQLFactory.db.addExpense(_expense)
           : await SQLFactory.db.updateExpense(_expense);
-      Navigator.popAndPushNamed(context, 'Expenses');
+      Navigator.of(context).pop();
     }
   }
 
